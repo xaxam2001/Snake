@@ -3,15 +3,23 @@
 //
 
 #include "PerceptronClassifier.hpp"
-#include <stdlib.h>
-#include <time.h>
+#include <cstdlib>
+#include <ctime>
 
 PerceptronClassifier::PerceptronClassifier(const int input_size) {
     this->input_size = input_size ;
-    weights = Eigen::MatrixXd(input_size + 1, 1);
+    weights = Eigen::MatrixXd::Random(input_size + 1, 1);
 }
 
 Eigen::MatrixXd PerceptronClassifier::predict(const Eigen::MatrixXd& X) const {
+    if (X.cols() != weights.rows() - 1) {
+        throw std::runtime_error(
+            "PerceptronClassifier::predict: Input X has wrong number of columns. "
+            "Expected " + std::to_string(weights.rows() - 1) +
+            ", got " + std::to_string(X.cols())
+        );
+    }
+
     // X is NxM with N samples and M = input_size
     Eigen::MatrixXd X_bias = Eigen::MatrixXd(X.rows(), X.cols() + 1); // we add one for the bias
     X_bias << Eigen::MatrixXd::Ones(X.rows(), 1), X; // adding a column of one in the first column of X_bias
@@ -26,22 +34,35 @@ Eigen::MatrixXd PerceptronClassifier::predict(const Eigen::MatrixXd& X) const {
 }
 
 double PerceptronClassifier::predict(const Eigen::RowVectorXd& X) const {
+    if (X.size() != weights.rows() - 1) {
+        throw std::runtime_error(
+            "PerceptronClassifier::predict: Input X has wrong number of columns. "
+            "Expected " + std::to_string(weights.rows() - 1) +
+            ", got " + std::to_string(X.cols())
+        );
+    }
+
     return predict(Eigen::MatrixXd(X))(0,0);
 }
 
 Eigen::VectorXd PerceptronClassifier::train(const Eigen::MatrixXd& X, const Eigen::MatrixXd& Y, const int epochs, const float learning_rate) {
     double mean_squared_error = 0.0;
-    Eigen::VectorXd error_list = Eigen::VectorXd::Zero(epochs/100);
+    Eigen::VectorXd error_list = Eigen::VectorXd::Zero(epochs/100 - 1);
 
-    Eigen::RowVectorXd X_k = Eigen::RowVectorXd::Ones(X.cols() + 1);
+    // One vector without bias, one with bias for updates
+    Eigen::RowVectorXd X_k(X.cols());
+    Eigen::RowVectorXd X_k_bias = Eigen::RowVectorXd::Ones(X.cols() + 1);
 
-    srand( time(nullptr));
+    srand(static_cast<unsigned>(time(nullptr)));
 
     for (int i = 0; i < epochs; i++) {
         int randomIndex = rand() % X.rows();
 
-        // get the random element as a colum vector with a one in first position
-        X_k.block(1, 0, X.cols(), 1) = X.row(randomIndex).transpose();
+        // Extract the random sample (no bias)
+        X_k = X.row(randomIndex);
+
+        // Prepare the bias-augmented vector for weight updates
+        X_k_bias.tail(X.cols()) = X_k;
 
         // get the corresponding class (ground truth
         double Y_k = Y(randomIndex, 0);
@@ -50,13 +71,13 @@ Eigen::VectorXd PerceptronClassifier::train(const Eigen::MatrixXd& X, const Eige
         double g_x_k = predict(X_k);
 
         // Update the weights using the Rosenblatt rule
-        weights += learning_rate * (Y_k - g_x_k) * X_k.transpose();
+        weights += learning_rate * (Y_k - g_x_k) * X_k_bias.transpose();
 
         // compute the mean square error
         mean_squared_error += (Y_k - g_x_k) * (Y_k - g_x_k);
 
         if (i % 100 == 0 && i != 0) {
-            error_list[i/100] = mean_squared_error / 100.0;
+            error_list[i/100 - 1] = mean_squared_error / 100.0;
             mean_squared_error = 0.0;
         }
     }
