@@ -14,9 +14,13 @@ The core objectives are:
 * **Game Engine:** Godot Engine (Version 4.5)
 * **Language:** C#, C++20, Python 3.11
 
-## 🕹️ How to play v1.0.0
+## 🕹️ How to play
 
-Go to https://github.com/xaxam2001/Snake/releases/tag/v1.0.0 and download the .exe file. You can either:
+### Godot version
+Go to https://github.com/xaxam2001/Snake/releases/tag/v1.1.0 and download the .zip archive. Extract it and launch the `Snake.exe` executable.
+
+### CMD version
+Go to https://github.com/xaxam2001/Snake/releases/tag/v1.1.0 and download the .exe file. You can either:
 - Launch the `.exe` file like any other program. Use the `directional arrows` or `WASD` to move. The difficulty is set on Normal by default.
 - Run it through the command line `.\Snake.v1.0.0.exe [difficulty]` and choose the difficulty from `0: easy` to `2: hard`.
 
@@ -34,11 +38,11 @@ Go to https://github.com/xaxam2001/Snake/releases/tag/v1.0.0 and download the .e
 
 - C# Core library to run the Snake logic.
 - Command line visual for debug and play the snake game.
+- Godot 2D visual for the Snake Game
 
 ### ➡️	Direct Next Steps
 
 - Implementing the ML_lib for the Linear Model (classification and regression).
-- Implementing the Godoot visual for the Snake Game
 - Implementing a recorder to start collecting the Data
 
 ### 📆 Future Implementation
