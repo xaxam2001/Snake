@@ -1,0 +1,169 @@
+[gd_scene load_steps=10 format=4 uid="uid://cuhg20xdbonnx"]
+
+[ext_resource type="FontFile" uid="uid://16ykjeqppu84" path="res://assets/font/PixelOperator8.ttf" id="1_iywne"]
+[ext_resource type="Script" uid="uid://dsl4uwl8blv2e" path="res://scripts/GameManager.cs" id="1_uwrxv"]
+[ext_resource type="TileSet" uid="uid://gi26xfqt3yw7" path="res://assets/sprites/new_tile_set.tres" id="2_lnu2h"]
+[ext_resource type="Script" uid="uid://ctp3r6box2nx4" path="res://scripts/DifficultyLabel.cs" id="3_gee14"]
+[ext_resource type="Script" uid="uid://pa31qhw6m3r8" path="res://scripts/GameRenderer.cs" id="3_lnu2h"]
+[ext_resource type="Script" uid="uid://b0dw3j2h6d0r8" path="res://scripts/ScoreLabel.cs" id="5_p57ef"]
+[ext_resource type="Script" uid="uid://dvwsv3j00nu1y" path="res://scripts/GameOverMenu.cs" id="6_p57ef"]
+[ext_resource type="Script" uid="uid://dodttphwm2pjf" path="res://scripts/MainMenu.cs" id="7_u5sy4"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p57ef"]
+bg_color = Color(0.2444494, 0.24792117, 0.26197112, 1)
+
+[node name="Game" type="Node2D"]
+
+[node name="ScoreLabel" type="Label" parent="."]
+offset_left = 72.0
+offset_top = 72.0
+offset_right = 392.0
+offset_bottom = 247.0
+theme_override_fonts/font = ExtResource("1_iywne")
+theme_override_font_sizes/font_size = 128
+text = "100"
+vertical_alignment = 1
+script = ExtResource("5_p57ef")
+
+[node name="DifficultyLabel" type="Label" parent="."]
+offset_left = 724.0
+offset_top = 1014.0
+offset_right = 1072.0
+offset_bottom = 1097.0
+theme_override_fonts/font = ExtResource("1_iywne")
+theme_override_font_sizes/font_size = 32
+text = "Normal mode"
+horizontal_alignment = 2
+vertical_alignment = 1
+script = ExtResource("3_gee14")
+
+[node name="GameRenderer" type="TileMapLayer" parent="."]
+scale = Vector2(8, 8)
+tile_map_data = PackedByteArray("AAAAAAAAAAAMAAAAAAABAAAAAAAHAAIAAAACAAAAAAAHAAIAAAADAAAAAAAHAAIAAAAEAAAAAAAHAAIAAAAFAAAAAAAHAAIAAAAGAAAAAAAHAAIAAAAHAAAAAAAHAAIAAAAIAAAAAAAHAAIAAAAJAAAAAAAHAAIAAAAKAAAAAAAHAAIAAAALAAAAAAAHAAIAAAAAAAEAAAAIAAIAAAAAAAIAAAAIAAIAAAAAAAMAAAAIAAIAAAAAAAQAAAAIAAIAAAARAAEAAAAJAAIAAAARAAIAAAAJAAIAAAARAAMAAAAJAAIAAAARAAQAAAAJAAIAAAARAAUAAAAJAAIAAAARAAYAAAAJAAIAAAARAAcAAAAJAAIAAAARAAgAAAAJAAIAAAARAAkAAAAJAAIAAAARAAoAAAAJAAIAAAARAAsAAAAJAAIAAAARAAwAAAAJAAIAAAARAA0AAAAJAAIAAAARAA4AAAAJAAIAAAARAA8AAAAJAAIAAAARABAAAAAJAAIAAAAQABEAAAAKAAIAAAAPABEAAAAKAAIAAAAOABEAAAAKAAIAAAANABEAAAAKAAIAAAAMABEAAAAKAAIAAAALABEAAAAKAAIAAAAKABEAAAAKAAIAAAAJABEAAAAKAAIAAAAIABEAAAAKAAIAAAAHABEAAAAKAAIAAAAGABEAAAAKAAIAAAAFABEAAAAKAAIAAAAEABEAAAAKAAIAAAADABEAAAAKAAIAAAACABEAAAAKAAIAAAABABEAAAAKAAIAAAAMAAAAAAAHAAIAAAANAAAAAAAHAAIAAAAOAAAAAAAHAAIAAAAPAAAAAAAHAAIAAAAQAAAAAAAHAAIAAAAAAAUAAAAIAAIAAAAAAAYAAAAIAAIAAAAAAAcAAAAIAAIAAAAAAAgAAAAIAAIAAAAAAAkAAAAIAAIAAAAAAAoAAAAIAAIAAAAAAAsAAAAIAAIAAAAAAAwAAAAIAAIAAAAAAA0AAAAIAAIAAAAAAA4AAAAIAAIAAAAAAA8AAAAIAAIAAAAAABAAAAAIAAIAAAARABEAAAAMAAAAAAAAABEAAAAMAAAAAAARAAAAAAAMAAAAAAA=")
+tile_set = ExtResource("2_lnu2h")
+script = ExtResource("3_lnu2h")
+_tileSet = ExtResource("2_lnu2h")
+_snakeHeadTileUp = Vector2i(1, 0)
+_snakeHeadTileRight = Vector2i(4, 0)
+_snakeHeadTileDown = Vector2i(3, 0)
+_snakeHeadTileLeft = Vector2i(2, 0)
+_snakeBodyTile = Vector2i(5, 0)
+_foodTile = Vector2i(6, 1)
+
+[node name="GameManager" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("1_uwrxv")
+
+[node name="GameOverMenu" type="Node2D" parent="."]
+unique_name_in_owner = true
+visible = false
+script = ExtResource("6_p57ef")
+
+[node name="GameOverLabel" type="Label" parent="GameOverMenu"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 331.0
+offset_top = 336.0
+offset_right = 811.0005
+offset_bottom = 644.0
+grow_horizontal = 2
+pivot_offset = Vector2(240, 0)
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_fonts/font = ExtResource("1_iywne")
+theme_override_font_sizes/font_size = 128
+text = "GAME
+OVER"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RestartButton" type="Button" parent="GameOverMenu"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 443.0
+offset_top = 648.0
+offset_right = 696.0
+offset_bottom = 739.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("1_iywne")
+theme_override_font_sizes/font_size = 31
+theme_override_styles/normal = SubResource("StyleBoxFlat_p57ef")
+text = "RESTART"
+
+[node name="MenuButton" type="Button" parent="GameOverMenu"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 443.0
+offset_top = 763.0
+offset_right = 696.0
+offset_bottom = 854.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("1_iywne")
+theme_override_font_sizes/font_size = 31
+theme_override_styles/normal = SubResource("StyleBoxFlat_p57ef")
+text = "MENU"
+
+[node name="MainMenu" type="Node2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("7_u5sy4")
+
+[node name="SelectDiffLabel" type="Label" parent="MainMenu"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 371.0
+offset_top = 348.0
+offset_right = 795.0
+offset_bottom = 503.0
+grow_horizontal = 2
+pivot_offset = Vector2(240, 0)
+theme_override_fonts/font = ExtResource("1_iywne")
+theme_override_font_sizes/font_size = 48
+text = "SELECT
+DIFFICULTY"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EasyModeButton" type="Button" parent="MainMenu"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 454.0
+offset_top = 510.0
+offset_right = 707.0
+offset_bottom = 601.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("1_iywne")
+theme_override_font_sizes/font_size = 31
+theme_override_styles/normal = SubResource("StyleBoxFlat_p57ef")
+text = "Easy"
+
+[node name="NormalModeButton" type="Button" parent="MainMenu"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 454.0
+offset_top = 623.0
+offset_right = 707.0
+offset_bottom = 714.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("1_iywne")
+theme_override_font_sizes/font_size = 31
+theme_override_styles/normal = SubResource("StyleBoxFlat_p57ef")
+text = "Normal"
+
+[node name="HardModeButton" type="Button" parent="MainMenu"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 454.0
+offset_top = 732.0
+offset_right = 707.0
+offset_bottom = 823.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("1_iywne")
+theme_override_font_sizes/font_size = 31
+theme_override_styles/normal = SubResource("StyleBoxFlat_p57ef")
+text = "Hard"

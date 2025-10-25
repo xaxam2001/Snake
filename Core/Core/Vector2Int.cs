@@ -1,5 +1,8 @@
 namespace Core;
 
+/// <summary>
+/// Represents a two-dimensional vector with integer components.
+/// </summary>
 public readonly struct Vector2Int
 {
     public int X { get; }
@@ -32,17 +35,18 @@ public readonly struct Vector2Int
     }
 
 
-    // Optional: ToString override
+    // ToString override
     public override string ToString() => $"({X}, {Y})";
 
-    // Optional: Equality members
+    // Equality members
     public override bool Equals(object? obj)
         => obj is Vector2Int other && X == other.X && Y == other.Y;
     
+    // HashCode override, needed for HashSet
     public override int GetHashCode() => HashCode.Combine(X, Y);
 
+    // Operator overloads
     public static bool operator ==(Vector2Int a, Vector2Int b) => a.Equals(b);
     public static bool operator !=(Vector2Int a, Vector2Int b) => !a.Equals(b);
-
     public static Vector2Int operator +(Vector2Int a, Vector2Int b) => new (a.X + b.X, a.Y + b.Y );
 }
