@@ -10,11 +10,17 @@ include_directories(${EIGEN_DIR})
 add_library(ML_lib SHARED
         library.hpp
         library.cpp
-        PerceptronClassifier.cpp
-        PerceptronClassifier.hpp)
+        LinearModel.cpp
+        LinearModel.hpp
+)
 
 set_target_properties(ML_lib PROPERTIES PREFIX "")
 
-add_executable(PerceptronDebug main.cpp main.hpp PerceptronClassifier.cpp PerceptronClassifier.hpp)
+add_executable(PerceptronDebug
+        main.cpp
+        main.hpp
+        LinearModel.cpp
+        LinearModel.hpp
+)
 target_include_directories(PerceptronDebug PRIVATE ${CMAKE_SOURCE_DIR})
 #target_link_libraries(PerceptronDebug EIGEN_DIR)
