@@ -129,6 +129,10 @@ void LinearRegressor::train(const Eigen::MatrixXd &X, const Eigen::MatrixXd &Y) 
     X_bias << Eigen::MatrixXd::Ones(X.rows(), 1), X; // adding a column of one in the first column of X_bias
 
     // use formula ((X^T * X)^-1 * X^T)*Y to compute the weights
-    weights = X_bias.colPivHouseholderQr().solve(Y);
+    Eigen::MatrixXd XT = X_bias.transpose();
+    Eigen::MatrixXd XTX_inverted = (XT * X_bias).completeOrthogonalDecomposition().pseudoInverse();
+    weights = (XTX_inverted * XT) * Y;
+
+    // weights = X_bias.colPivHouseholderQr().solve(Y);
 }
 
