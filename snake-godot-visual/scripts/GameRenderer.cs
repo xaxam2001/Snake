@@ -37,6 +37,11 @@ public partial class GameRenderer : TileMapLayer
 	{
 		_lastHeadTileIndex = _snakeHeadTileRight; // when spawning the snake, start moving right
 	}
+	
+	private Vector2I ConvertToWorldCoord(Vector2I coord, Vector2I snakeHeadCoord)
+	{
+		return coord + snakeHeadCoord;
+	}
 
 	/// <summary>
 	/// Handles the game state update event and updates the visual representation of the game grid.
@@ -49,35 +54,39 @@ public partial class GameRenderer : TileMapLayer
 		// Clear or reuse tiles here
 		ClearInnerGrid();
 		
-		for (int i = 0; i < GameManager.GridSize; i++)
+		// ======== Place the head ===========
+		Vector2I snakeHeadWorld = new Vector2I(data.State[2], data.State[5]);
+		
+		Vector2I tileIndex = new Vector2I();
+				
+		// get the head tile index based on the last action performed by the player
+		if (data.Actions[0]) tileIndex = _snakeHeadTileUp;
+		else if (data.Actions[1]) tileIndex = _snakeHeadTileRight;
+		else if (data.Actions[2]) tileIndex = _snakeHeadTileDown;
+		else if (data.Actions[3]) tileIndex = _snakeHeadTileLeft;
+		else tileIndex = _lastHeadTileIndex; // default to the last head
+				
+		_lastHeadTileIndex = tileIndex;
+	
+		// invert x and y because godot use a different coordinates system
+		SetCell(new Vector2I(snakeHeadWorld.Y+1, snakeHeadWorld.X+1), _atlasSourceId, tileIndex);
+
+		// ======== Place the apple ===========
+		Vector2I applePos = new Vector2I(data.State[6], data.State[7]);
+		applePos = ConvertToWorldCoord(applePos, snakeHeadWorld);
+		
+		SetCell(new Vector2I(applePos.Y+1, applePos.X+1), _atlasSourceId, _foodTile);
+
+		// ======== Place the body ===========
+		int snakeLength = data.State[8] - 1; // remove the head
+		for (int i = 0; i < 2*snakeLength ; i+=2)
 		{
-			for (int j = 0; j < GameManager.GridSize; j++)
-			{
-				int elem = data.State[GameManager.InfoSize + i * GameManager.GridSize + j]; // get the element at the current position in the grid
-				if (elem == 0) continue; // skip empty cells
-
-				Vector2I tileIndex = new Vector2I();
-				
-				if (elem == 1) tileIndex = _snakeBodyTile; // snake body
-				else if (elem == 2)
-				{
-					// get the head tile index based on the last action performed by the player
-					if (data.Actions[0]) tileIndex = _snakeHeadTileUp;
-					else if (data.Actions[1]) tileIndex = _snakeHeadTileRight;
-					else if (data.Actions[2]) tileIndex = _snakeHeadTileDown;
-					else if (data.Actions[3]) tileIndex = _snakeHeadTileLeft;
-					else tileIndex = _lastHeadTileIndex; // default to the last head
-					
-					_lastHeadTileIndex = tileIndex;
-				}
-				else if (elem == 3) tileIndex = _foodTile; // food
-				
-				
-				// invert i and j because the grid is transposed compared to a 2D array
-				SetCell(new Vector2I(j+1, i+1), _atlasSourceId, tileIndex);
-			}
+			Vector2I snakePiece = new Vector2I(data.State[i + GameManager.InfoSize], data.State[i+GameManager.InfoSize+1]);
+			snakePiece = ConvertToWorldCoord(snakePiece, snakeHeadWorld);
+		
+			// invert x and y because godot use a different coordinates system
+			SetCell(new Vector2I(snakePiece.Y+1, snakePiece.X+1), _atlasSourceId, _snakeBodyTile);
 		}
-
 	}
 
 	/// <summary>

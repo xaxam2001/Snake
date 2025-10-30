@@ -21,7 +21,9 @@ public class GameManager
     private readonly Snake.Difficulty _difficulty;
     
     private const int GRID_SIZE = 16;
-    private const int INFO_SIZE = 2;
+    
+    // Size of the game information (game over, score) + (distance from each walls) + (coordinates of apple) + (snake size)
+    private const int INFO_SIZE = 2 + 4 + 2 + 1;
     
     public GameManager(int difficulty = 1)
     {
@@ -86,12 +88,44 @@ public class GameManager
         Console.CursorVisible = true;
     }
 
+    private Vector2Int ConvertToWorldCoord(Vector2Int coord, Vector2Int snakeHeadCoord)
+    {
+        return coord + snakeHeadCoord;
+    }
+
+    private int[,] GetGameStateGrid(int[] gameState)
+    {
+        int[,] gameGrid = new int[GRID_SIZE, GRID_SIZE];
+        
+        Vector2Int snakeHeadWorld = new Vector2Int(gameState[2], gameState[5]);
+        
+        gameGrid[snakeHeadWorld.X, snakeHeadWorld.Y] = 2;
+        
+        Vector2Int applePos = new Vector2Int(gameState[6], gameState[7]);
+        applePos = ConvertToWorldCoord(applePos, snakeHeadWorld);
+        
+        gameGrid[applePos.X, applePos.Y] = 3;
+        
+        int snakeLength = gameState[8] - 1; // remove the head
+        for (int i = 0; i < 2*snakeLength ; i+=2)
+        {
+            Vector2Int snakePiece = new Vector2Int(gameState[i+ INFO_SIZE], gameState[i+INFO_SIZE+1]);
+            snakePiece = ConvertToWorldCoord(snakePiece, snakeHeadWorld);
+        
+            gameGrid[snakePiece.X, snakePiece.Y] = 1;
+        }
+
+        return gameGrid;
+    }
+
     private void PrintRawGame()
     {
         Console.SetCursorPosition(0, 0);
-        Console.WriteLine($"======= SNAKE GAME =======");
+        Console.WriteLine("======= SNAKE GAME =======");
         Console.WriteLine($"Difficulty: {_difficulty}");
         Console.WriteLine($"Score: {_gameState![1]}"); // the exclamation mark check if _gameState is not null
+        
+        int [,] gameStateGrid = GetGameStateGrid(_gameState);
 
         Console.WriteLine(_borderLine);
         for (int i = 0; i < GRID_SIZE; i++)
@@ -99,7 +133,7 @@ public class GameManager
             Console.Write(BORDER_VISUAL_ELEMENT);
             for (int j = 0; j < GRID_SIZE; j++)
             {
-                int elem = _gameState[INFO_SIZE + i * GRID_SIZE + j];
+                int elem = gameStateGrid[i, j];
                 Console.Write(_elementToString[elem]);
             }
             Console.Write(BORDER_VISUAL_ELEMENT);

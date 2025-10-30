@@ -21,20 +21,20 @@ public partial class MainMenu : Node2D
 		_manager = GetNode<GameManager>("%GameManager");
 
 		// register the button click events
-		_easyButton.ButtonDown += () => { StartGame(Core.Snake.Difficulty.Easy); };
+		_easyButton.ButtonDown += () => { StartGame(0); };
 
-		_normalButton.ButtonDown += () => { StartGame(Core.Snake.Difficulty.Normal); };
+		_normalButton.ButtonDown += () => { StartGame(1); };
 
-		_hardButton.ButtonDown += () => { StartGame(Core.Snake.Difficulty.Hard); };
+		_hardButton.ButtonDown += () => { StartGame(2); };
 	}
 
 	/// <summary>
 	/// Starts the game with the specified difficulty level.
 	/// </summary>
 	/// <param name="difficulty">The difficulty level to initialize the game with. Can be Easy, Normal, or Hard.</param>
-	private void StartGame(Core.Snake.Difficulty difficulty)
+	private void StartGame(int difficulty)
 	{
-		_manager.Difficulty = difficulty;
+		_manager.SetDifficulty(difficulty);
 		_manager.StartGame();
 		Hide();
 	}

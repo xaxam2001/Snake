@@ -49,4 +49,5 @@ public readonly struct Vector2Int
     public static bool operator ==(Vector2Int a, Vector2Int b) => a.Equals(b);
     public static bool operator !=(Vector2Int a, Vector2Int b) => !a.Equals(b);
     public static Vector2Int operator +(Vector2Int a, Vector2Int b) => new (a.X + b.X, a.Y + b.Y );
+    public static Vector2Int operator -(Vector2Int a, Vector2Int b) => new (a.X - b.X, a.Y - b.Y );
 }

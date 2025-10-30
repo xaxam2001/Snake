@@ -183,7 +183,8 @@ public class Game
     /// the second element is the score, and the rest represents the game grid.</returns>
     public int[] GetState()
     {
-        _state.UpdateGameState(_isGameOver, _snake.Count-2, _game);
+        // _state.UpdateGameState(_isGameOver, _snake.Count-2, _game);
+        _state.UpdateGameState(_isGameOver, _snake.Count-2, _apple, _snakeHead, _snake);
         return _state.State;
     }
 }

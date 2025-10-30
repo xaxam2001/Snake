@@ -18,7 +18,9 @@ public partial class GameManager : Node
 	public bool GameOver { get; private set; }
 	
 	public const int GridSize = 16; // size of the grid
-	public const int InfoSize = 2; // size of the info vector (game over, score)
+	
+	// Size of the game information (game over, score) + (distance from each walls) + (coordinates of apple) + (snake size)
+	public const int InfoSize = 2 + 4 + 2 + 1;
 	
 	public override void _Ready()
 	{
@@ -88,6 +90,11 @@ public partial class GameManager : Node
 		// game over: stop the timer and set the GameOver flag 
 		_timer.Stop();
 		GameOver = true;
+	}
+
+	public void SetDifficulty(int difficulty)
+	{
+		Difficulty = (Snake.Difficulty) difficulty;
 	}
 
 	/// <summary>
