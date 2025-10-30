@@ -64,7 +64,7 @@ public class GameManager
         
         while (true)
         {
-            var key = Console.ReadKey();
+            var key = Console.ReadKey(true);
 
             _action = [false, false, false, false];
             
