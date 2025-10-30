@@ -66,13 +66,13 @@ Eigen::VectorXd PerceptronClassifier::train(const Eigen::MatrixXd& X, const Eige
     for (int i = 0; i < epochs; i++) {
         const int randomIndex = rand() % X.rows();
 
-        // Extract the random sample (no bias)
+        // Extract the random sample
         X_k = X.row(randomIndex);
 
         // Prepare the bias-augmented vector for weight updates
         X_k_bias.tail(X.cols()) = X_k;
 
-        // get the corresponding class (ground truth
+        // get the corresponding class (ground truth)
         const double Y_k = Y(randomIndex, 0);
 
         // predict the value of the random element X_k
@@ -130,9 +130,8 @@ void LinearRegressor::train(const Eigen::MatrixXd &X, const Eigen::MatrixXd &Y) 
 
     // use formula ((X^T * X)^-1 * X^T)*Y to compute the weights
     Eigen::MatrixXd XT = X_bias.transpose();
-    Eigen::MatrixXd XTX_inverted = (XT * X_bias).completeOrthogonalDecomposition().pseudoInverse();
+    Eigen::MatrixXd XTX_inverted = (XT * X_bias).completeOrthogonalDecomposition().pseudoInverse(); // TODO add noise and inverse
     weights = (XTX_inverted * XT) * Y;
 
-    // weights = X_bias.colPivHouseholderQr().solve(Y);
 }
 
