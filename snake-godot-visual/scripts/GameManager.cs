@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace Snake.scripts;
 
 using Godot.Collections;
@@ -9,6 +11,7 @@ public partial class GameManager : Node
 	[Export] public Snake.Difficulty Difficulty; // used to set the difficulty of the game
 	
 	private bool[] _action; // _actions represent the user's action
+	private bool[] _lastAction;
 	
 	private Timer _timer; // timer used to control the game speed (calls the DoAction method every interval)
 	private Snake _snake; // the game logic
@@ -23,10 +26,8 @@ public partial class GameManager : Node
 	public const int InfoSize = 2 + 4 + 2 + 1;
 	
 	public override void _Ready()
-	{
+	{ 
 		Difficulty = Snake.Difficulty.Normal; // base difficulty is normal
-		
-		_action = new bool[4]; // set the default action to false
 		
 		_snake = new Snake();
 		
@@ -46,6 +47,9 @@ public partial class GameManager : Node
 		// reset game information
 		GameOver = false;
 		Score = 0;
+		
+		_action = new bool[4]; // set the default action to false
+		_lastAction = _action;
 		
 		// Initialize the game state
 		_gameState = _snake.Initialize(GridSize, (int) Difficulty);
@@ -75,8 +79,14 @@ public partial class GameManager : Node
 			Input.IsActionPressed("move_up"),
 			Input.IsActionPressed("move_right"),
 			Input.IsActionPressed("move_down"),
-			Input.IsActionPressed("move_left"),
+			Input.IsActionPressed("move_left")
 		];
+
+		if (!_action.Any(b => b))
+			_action = _lastAction;
+		else
+			_lastAction = _action;
+		
 	}
 
 	/// <summary>
