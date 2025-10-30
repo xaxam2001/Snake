@@ -2,8 +2,8 @@ import ctypes
 import numpy as np
 import os
 
-dll_path = "C:/Users/maxim/Godot Games/Snake/ML_lib/cmake-build-debug/ML_lib.dll"
-dll_dir = "C:/Users/maxim/Godot Games/Snake/ML_lib/cmake-build-debug"
+dll_path = "C:/Users/maxim/Godot Games/Snake/ML_lib/cmake-build-release/ML_lib.dll"
+dll_dir = "C:/Users/maxim/Godot Games/Snake/ML_lib/cmake-build-release"
 
 os.add_dll_directory(dll_dir)
 
