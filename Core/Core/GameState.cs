@@ -15,7 +15,7 @@ public class GameState
 
     // Size of the game information (game over, score) + (distance from each wall) + (coordinates of apple) + (snake size)
     private const int INFO_SIZE = 2 + 4 + 2 + 1; 
-    private int Size => GridSize * GridSize + INFO_SIZE; // Total size of the vector
+    private int Size => GridSize * GridSize * 2 + INFO_SIZE; // Total size of the vector
 
     public GameState(int n)
     {
@@ -28,10 +28,10 @@ public class GameState
     // - game over +1
     // - score +1
     // - coordinates of apple +2
-    // - distance to left edge +2
-    // - distance to right edge +2
-    // - distance to top edge +2
-    // - distance to bottom edge +2
+    // - distance to top edge +1
+    // - distance to right edge +1
+    // - distance to bottom edge +1
+    // - distance to left edge +1
     // - coordinates of snake body relative to snake head +2x16x16 (has to follow the order of the snake pieces
     // and, since the vector is of fixed size, we add coordinates of 0 for padding)
     public void UpdateGameState(bool isGameOver, int score, Vector2Int applePosition, Vector2Int snakeHeadPosition, Queue<Vector2Int> snakeBody)

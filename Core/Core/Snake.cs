@@ -14,6 +14,9 @@ public class Snake
     // Difficulty levels
     public enum Difficulty {Easy = 0, Normal = 1, Hard = 2}
     private Difficulty _difficulty; // Current difficulty level
+    
+    // recorder
+    private Recorder? _recorder;
 
     /// <summary>
     /// Initializes the game state by setting up the game grid, placing the snake, and spawning the first apple.
@@ -26,6 +29,8 @@ public class Snake
         _difficulty = (Difficulty)difficulty;
 
         _game = new Game(gameSize);
+        
+        _recorder = new Recorder();
         
         return _game.GetState();
     }
@@ -43,6 +48,8 @@ public class Snake
             throw new InvalidOperationException("Snake not initialized.");
 
         _game.DoAction(action); // perform the action
+        
+        _recorder?.RecordState(_game.GetState(), action);
         
         return _game.GetState(); // return the updated state
     }

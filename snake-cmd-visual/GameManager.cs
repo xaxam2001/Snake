@@ -11,7 +11,7 @@ public class GameManager
     private readonly string _borderLine;
     
     // TEMPORARY ACTIONS action is URDL (up, right, down, left)
-    private bool[] _action = [false, false, false, true];
+    private bool[] _action = [false, false, false, false];
     
     private readonly Timer _timer;
     private readonly int _interval;
