@@ -17,12 +17,12 @@ The core objectives are:
 ## 🕹️ How to play
 
 ### Godot version
-Go to https://github.com/xaxam2001/Snake/releases/tag/v1.1.0 and download the .zip archive. Extract it and launch the `Snake.exe` executable.
+Go to https://github.com/xaxam2001/Snake/releases/tag/v1.2.0 and download the .zip archive. Extract it and launch the `Snake.exe` executable.
 
 ### CMD version
-Go to https://github.com/xaxam2001/Snake/releases/tag/v1.1.0 and download the .exe file. You can either:
+Go to https://github.com/xaxam2001/Snake/releases/tag/v1.2.0 and download the .exe file. You can either:
 - Launch the `.exe` file like any other program. Use the `directional arrows` or `WASD` to move. The difficulty is set on Normal by default.
-- Run it through the command line `.\Snake.v1.0.0.exe [difficulty]` and choose the difficulty from `0: easy` to `2: hard`.
+- Run it through the command line `.\Snake.v1.2.0.exe [difficulty]` and choose the difficulty from `0: easy` to `2: hard`.
 
 ## 📁 Repository Organisation
 
@@ -39,19 +39,18 @@ Go to https://github.com/xaxam2001/Snake/releases/tag/v1.1.0 and download the .e
 - C# Core library to run the Snake logic.
 - Command line visual for debug and play the snake game.
 - Godot 2D visual for the Snake Game
-
-### ➡️	Direct Next Steps
-
 - Implementing the ML_lib for the Linear Model (classification and regression).
 - Implementing a recorder to start collecting the Data
 
-### 📆 Future Implementation
+### ➡️	Direct Next Steps
 
 - Implementing the complete ML_lib (Multi Layer Perceptron, Radial Basis Function Network).
+
+### 📆 Future Implementation
+
 - Build different model using the ML_lib.
 - Train these different models using collected player data.
 
-## 🎓 Authors & Contact
+## 🎓 Author & Contact
 
 * **Maxime Chalumeau** - (https://github.com/xaxam2001)
-* **Tom Dordet** - (https://github.com/TomDordet)
