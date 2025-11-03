@@ -47,9 +47,9 @@ public class Snake
         if (_game == null)
             throw new InvalidOperationException("Snake not initialized.");
 
-        _game.DoAction(action); // perform the action
-        
         _recorder?.RecordState(_game.GetState(), action);
+        
+        _game.DoAction(action); // perform the action
         
         return _game.GetState(); // return the updated state
     }
