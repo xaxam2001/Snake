@@ -12,6 +12,8 @@ add_library(ML_lib SHARED
         library.cpp
         LinearModel.cpp
         LinearModel.hpp
+        MLP.cpp
+        MLP.hpp
 )
 
 set_target_properties(ML_lib PROPERTIES PREFIX "")
