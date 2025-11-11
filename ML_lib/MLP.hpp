@@ -8,22 +8,34 @@
 #include <Eigen/Dense>
 
 class MLP {
-private:
-    Eigen::MatrixXd NPL; // Neuron per layer
+    Eigen::VectorXi NPL; // Neuron per layer
     int L; // last layer index
     bool isClassification;
-    Eigen::MatrixXd weights;
+    std::vector<Eigen::MatrixXd> weights;
+    std::vector<Eigen::VectorXd> X;
+    std::vector<Eigen::VectorXd> deltas;
+
+    void propagate(const Eigen::VectorXd& X_input);
 
 public:
-    explicit MLP(Eigen::MatrixXd NPL, bool isClassification = true);
+    explicit MLP(const Eigen::VectorXi &NPL, const bool isClassification = true);
     ~MLP() = default;
 
-    [[nodiscard]] const Eigen::MatrixXd* get_neuron_per_layer() const;
+    [[nodiscard]] const Eigen::VectorXi* get_neuron_per_layer() const;
     [[nodiscard]] int get_input_size() const;
     [[nodiscard]] int get_output_size() const;
-    [[nodiscard]] const Eigen::MatrixXd* get_weights() const;
+    [[nodiscard]] const std::vector<Eigen::MatrixXd>* get_weights() const;
+    [[nodiscard]] const std::vector<Eigen::VectorXd>* get_X() const {
+        return &X;
+    }
+    [[nodiscard]] const std::vector<Eigen::VectorXd>* get_deltas() const {
+        return &deltas;
+    }
 
-    // TODO: add missing methods
+    [[nodiscard]] Eigen::VectorXd predict(const Eigen::VectorXd& X_input);
+    [[nodiscard]] Eigen::MatrixXd predict(const Eigen::MatrixXd& X_input);
+
+    [[nodiscard]] Eigen::VectorXd train(const Eigen::MatrixXd& X_input, const Eigen::MatrixXd& Y, int num_iter, double learning_rate, int error_list_size);
 };
 
 

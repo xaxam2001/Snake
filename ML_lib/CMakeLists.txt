@@ -23,6 +23,8 @@ add_executable(PerceptronDebug
         main.hpp
         LinearModel.cpp
         LinearModel.hpp
+        MLP.cpp
+        MLP.hpp
 )
 target_include_directories(PerceptronDebug PRIVATE ${CMAKE_SOURCE_DIR})
 #target_link_libraries(PerceptronDebug EIGEN_DIR)
