@@ -45,7 +45,14 @@ MLP::MLP(const Eigen::VectorXi &NPL, const bool isClassification) {
 }
 
 void MLP::propagate(const Eigen::VectorXd &X_input) {
-    assert(X_input.size() == this->NPL(0)); // ensure that the X size matches the MLP input size
+    // ensure that the X size matches the MLP input size
+    if (X_input.size() != this->NPL(0)) {
+        throw std::runtime_error(
+            "MLP::train, X_input.size doesn't match the size of the MLP input"
+            "\nGot X_input.size(): " + std::to_string(X_input.size()) +
+            "\nExpected: " + std::to_string(this->NPL(0))
+        );
+    }
 
     this->X[0].tail(X_input.size()) = X_input; // update the X row vector for input layer (keeping bias neuron)
 
@@ -64,12 +71,23 @@ void MLP::propagate(const Eigen::VectorXd &X_input) {
 
 Eigen::VectorXd MLP::predict(const Eigen::VectorXd &X_input) {
     propagate(X_input);
-    return this->X[L].segment(1, X_input.size()-1); // return output without the bias
+    return this->X[L].segment(1, X[L].size()-1); // return output without the bias
 }
 
 Eigen::VectorXd MLP::train(const Eigen::MatrixXd &X_input, const Eigen::MatrixXd &Y, const int num_iter, const double learning_rate, int error_list_size) {
-    assert(X_input.cols() == Y.cols());
-    assert(num_iter > 0);
+    if (X_input.cols() != Y.cols()) {
+        throw std::runtime_error(
+            "MLP::train, X_input.cols doesn't match the number of Y.cols "
+            "\nX_input.cols(): " + std::to_string(X_input.cols()) +
+            "\nY.cols(): " + std::to_string(Y.cols())
+        );
+    }
+
+    if (num_iter <= 0) {
+        throw std::runtime_error(
+            "MLP::train, num_iter must be > 0"
+        );
+    }
 
     if (error_list_size > num_iter) error_list_size = num_iter;
 

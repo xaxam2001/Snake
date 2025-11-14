@@ -11,17 +11,17 @@ int main() {
          2, 2,
          3, 1;
 
-    Eigen::MatrixXd Y(3, 1);
-    Y << 1,
-         1,
-         -1;
+    Eigen::MatrixXd Y(3, 2);
+    Y << 1, 1,
+         1, 2,
+         -1, -2;
 
     std::cout << "Input matrix X:\n" << X << std::endl;
     std::cout << "Labels Y:\n" << Y << std::endl;
 
     // ===== MLP model tests ======
     Eigen::VectorXi NPL(3);
-    NPL << 2, 2, 1;
+    NPL << 2, 2, 2;
     MLP mlp(NPL, true);
 
     for (int l = 0; l < NPL.size(); ++l) {

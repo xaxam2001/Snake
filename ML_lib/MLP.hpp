@@ -18,7 +18,7 @@ class MLP {
     void propagate(const Eigen::VectorXd& X_input);
 
 public:
-    explicit MLP(const Eigen::VectorXi &NPL, const bool isClassification = true);
+    explicit MLP(const Eigen::VectorXi &NPL, bool isClassification = true);
     ~MLP() = default;
 
     [[nodiscard]] const Eigen::VectorXi* get_neuron_per_layer() const;

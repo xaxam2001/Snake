@@ -1,6 +1,8 @@
 #include "library.hpp"
 #include <cstdint>
 
+#include "MLP.hpp"
+
 #if WIN32
 #define DLLEXPORT __declspec(dllexport)
 #else
@@ -153,5 +155,59 @@ extern "C" {
         delete model;
     }
 
+    // ============= MLP related method ================
 
+    DLLEXPORT MLP *create_mlp(const int32_t* npl, const int32_t number_layer, const bool is_classification) {
+        // Map the input buffer to an Eigen matrix (no copy)
+        const Eigen::Map<const Eigen::VectorXi> NPL(npl, number_layer);
+
+        return new MLP(NPL, is_classification);
+    }
+
+    DLLEXPORT void predict_one_mlp(
+        MLP *model,
+        const double* X_data, const int32_t size,
+        double** out_data, int32_t* out_size) {
+        // Map the input buffer to an Eigen matrix (no copy)
+        const Eigen::Map<const Eigen::VectorXd> X(X_data, size);
+
+        // Do the prediction
+        Eigen::VectorXd prediction = model->predict(Eigen::VectorXd(X));
+
+        // Allocate a flat buffer for the output
+        const auto total = static_cast<int32_t>(prediction.size());
+        *out_data = static_cast<double*>(std::malloc(total * sizeof(double)));
+        std::memcpy(*out_data, prediction.data(), total * sizeof(double));
+
+        *out_size = static_cast<int32_t>(prediction.size());
+    }
+
+    DLLEXPORT void train_mlp(
+        MLP* model,
+        const double* X_data, const int32_t X_rows, const int32_t X_cols,
+        const double* Y_data, const int32_t Y_rows, const int32_t Y_cols,
+        double** out_error_data,  // pointer to error buffer (output)
+        int32_t* out_size,        // size of the error array (output)
+        const int32_t num_iter = 1000,
+        const float learning_rate = 0.01f,
+        const int32_t error_list_size = 1000)
+    {
+        // Map input buffers to Eigen matrices (no copies)
+        const MapMatrixXdRowMajor X(X_data, X_rows, X_cols);
+        const MapMatrixXdRowMajor Y(Y_data, Y_rows, Y_cols);
+
+        // Train the model and get the error vector
+        Eigen::VectorXd error = model->train(Eigen::MatrixXd(X), Eigen::MatrixXd(Y), num_iter, learning_rate, error_list_size);
+
+        // Allocate output buffer
+        *out_size = static_cast<int32_t>(error.size());
+        *out_error_data = static_cast<double*>(std::malloc(error.size() * sizeof(double)));
+
+        // Copy error data into the allocated buffer
+        std::memcpy(*out_error_data, error.data(), error.size() * sizeof(double));
+    }
+
+    DLLEXPORT void release_mlp(const MLP *model) {
+        delete model;
+    }
 }
