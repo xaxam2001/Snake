@@ -4,6 +4,9 @@
 
 #include "MLP.hpp"
 
+#include <numeric>
+#include <random>
+
 const Eigen::VectorXi* MLP::get_neuron_per_layer() const {
     return &NPL;
 }
@@ -71,10 +74,12 @@ void MLP::propagate(const Eigen::VectorXd &X_input) {
 
 Eigen::VectorXd MLP::predict(const Eigen::VectorXd &X_input) {
     propagate(X_input);
-    return this->X[L].segment(1, X[L].size()-1); // return output without the bias
+    return  this->X[L].segment(1, X[L].size()-1); // return output without the bias
 }
 
-Eigen::VectorXd MLP::train(const Eigen::MatrixXd &X_input, const Eigen::MatrixXd &Y, const int num_iter, const double learning_rate, int error_list_size) {
+TrainingResults MLP::train(const Eigen::MatrixXd &X_input, const Eigen::MatrixXd &Y,
+                           const int num_iter, const double learning_rate,
+                           double train_proportion, int error_list_size) {
     if (X_input.cols() != Y.cols()) {
         throw std::runtime_error(
             "MLP::train, X_input.cols doesn't match the number of Y.cols "
@@ -89,9 +94,43 @@ Eigen::VectorXd MLP::train(const Eigen::MatrixXd &X_input, const Eigen::MatrixXd
         );
     }
 
+    // ===== clamp values =====
     if (error_list_size > num_iter) error_list_size = num_iter;
+    if (train_proportion > 1) train_proportion = 1.0f;
+    if (train_proportion < 0) train_proportion = 0.0f;
 
-    Eigen::VectorXd error_list = Eigen::VectorXd::Zero(error_list_size);
+    // ===== Split the data =====
+    long total_samples = X_input.cols();
+    long train_count = (long)(total_samples * train_proportion);
+    long test_count = total_samples - train_count;
+
+    // ==== create random index ======
+    std::vector<int> indices(total_samples);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(indices.begin(), indices.end(), g);
+
+    // ==== create sub-matrix and associated Y =====
+    Eigen::MatrixXd X_train(X_input.rows(), train_count);
+    Eigen::MatrixXd Y_train(Y.rows(), train_count);
+    Eigen::MatrixXd X_test(X_input.rows(), test_count);
+    Eigen::MatrixXd Y_test(Y.rows(), test_count);
+
+    for(long i = 0; i < total_samples; i++) {
+        if(i < train_count) {
+            X_train.col(i) = X_input.col(indices[i]);
+            Y_train.col(i) = Y.col(indices[i]);
+        } else {
+            X_test.col(i - train_count) = X_input.col(indices[i]);
+            Y_test.col(i - train_count) = Y.col(indices[i]);
+        }
+    }
+
+    // setup other variables
+    Eigen::VectorXd train_error_list = Eigen::VectorXd::Zero(error_list_size);
+    Eigen::VectorXd test_error_list = Eigen::VectorXd::Zero(error_list_size);
+
     double MSE_cumul = 0.0;
     int error_idx = 0;
     int modulo = num_iter / error_list_size;
@@ -99,25 +138,20 @@ Eigen::VectorXd MLP::train(const Eigen::MatrixXd &X_input, const Eigen::MatrixXd
 
     // One vector without bias, one with bias for updates
     Eigen::VectorXd X_k(X_input.rows());
-
     Eigen::VectorXd Y_k_bias = Eigen::VectorXd::Ones(Y.rows() + 1);
 
     for (int i = 0; i < num_iter; i++) {
-        const int randomIndex = rand() % X_input.cols();
+        const int randomIndex = rand() % train_count;
 
-        X_k = X_input.col(randomIndex); // get a random example
+        X_k = X_train.col(randomIndex); // get a random example
 
-        Y_k_bias.tail(Y.rows()) = Y.col(randomIndex);
+        Y_k_bias.tail(Y.rows()) = Y_train.col(randomIndex);
 
         propagate(X_k);
 
         deltas[L] = this->X[L] - Y_k_bias;
 
         MSE_cumul += deltas[L].array().square().mean();
-        if ((i + 1) % modulo == 0) {
-            error_list(error_idx++) = MSE_cumul / modulo;
-            MSE_cumul = 0.0;
-        }
 
         if (this->isClassification) {
             deltas[L] = deltas[L].array() * (1.0 - this->X[L].array().square()).array();
@@ -132,13 +166,40 @@ Eigen::VectorXd MLP::train(const Eigen::MatrixXd &X_input, const Eigen::MatrixXd
         for (int l = 1; l <= L; l++) {
             weights[l] -= learning_rate * (this->X[l-1] * deltas[l].transpose());
         }
+
+        // get the error
+        if ((i + 1) % modulo == 0 && error_idx < error_list_size) {
+            train_error_list(error_idx) = MSE_cumul / modulo;
+            MSE_cumul = 0.0;
+
+            // update the test error
+            if (test_count > 0) {
+                double MSE_cumul_test = 0.0;
+                // We iterate over the test set to get an accurate metric
+                for(int t = 0; t < test_count; t++) {
+                    Eigen::VectorXd X_test_sample = X_test.col(t);
+                    Eigen::VectorXd Y_test_target = Eigen::VectorXd::Ones(Y.rows() + 1);
+                    Y_test_target.tail(Y.rows()) = Y_test.col(t);
+
+                    propagate(X_test_sample);
+
+                    Eigen::VectorXd diff = this->X[L] - Y_test_target;
+                    MSE_cumul_test += diff.array().square().mean();
+                }
+                test_error_list(error_idx) = MSE_cumul_test / test_count;
+            } else {
+                test_error_list(error_idx) = 0.0;
+            }
+
+            error_idx++;
+        }
     }
 
-    // Write leftover if exists
-    if (MSE_cumul > 0 && error_idx < error_list_size) {
-        const int remaining_samples = num_iter - error_idx * modulo;
-        error_list(error_idx) = MSE_cumul / remaining_samples;
-    }
+    // // Write leftover if exists
+    // if (MSE_cumul > 0 && error_idx < error_list_size) {
+    //     const int remaining_samples = num_iter - error_idx * modulo;
+    //     train_error_list(error_idx) = MSE_cumul / remaining_samples;
+    // }
 
-    return error_list;
+    return {train_error_list, test_error_list};
 }

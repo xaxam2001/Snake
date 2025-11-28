@@ -116,11 +116,22 @@ lib.predict_one_mlp.argtypes = [
 lib.predict_one_mlp.restype = None
 
 lib.train_mlp.argtypes = [
-    ctypes.c_void_p,
-    ctypes.POINTER(ctypes.c_double), ctypes.c_int32, ctypes.c_int32,
-    ctypes.POINTER(ctypes.c_double), ctypes.c_int32, ctypes.c_int32,
-    ctypes.POINTER(ctypes.POINTER(ctypes.c_double)), ctypes.POINTER(ctypes.c_int32),
-    ctypes.c_int32, ctypes.c_float, ctypes.c_int32
+    ctypes.c_void_p,                                      # model
+    ctypes.POINTER(ctypes.c_double), ctypes.c_int32, ctypes.c_int32, # X, rows, cols
+    ctypes.POINTER(ctypes.c_double), ctypes.c_int32, ctypes.c_int32, # Y, rows, cols
+    
+    # Train Error Outputs
+    ctypes.POINTER(ctypes.POINTER(ctypes.c_double)),      # out_train_error
+    ctypes.POINTER(ctypes.c_int32),                       # out_train_size
+    
+    # Test Error Outputs
+    ctypes.POINTER(ctypes.POINTER(ctypes.c_double)),      # out_test_error
+    ctypes.POINTER(ctypes.c_int32),                       # out_test_size
+    
+    ctypes.c_int32,   # num_iter
+    ctypes.c_float,   # learning_rate
+    ctypes.c_double,  # train_proportion
+    ctypes.c_int32    # error_list_size
 ]
 lib.train_mlp.restype = None
 
@@ -292,28 +303,52 @@ class MLP:
         lib.free_buffer(out_ptr)
         return result_copy
 
-    def train(self, X: np.ndarray, Y: np.ndarray, num_iter=1000, lr=0.01, error_list_size=1000):
+    def train(self, X: np.ndarray, Y: np.ndarray, num_iter=1000, lr=0.01, train_proportion=0.8, error_list_size=1000):
+        """
+        Returns:
+            tuple(np.ndarray, np.ndarray): (train_errors, test_errors)
+        """
         X_ptr = _to_c_ptr(X)
         Y_ptr = _to_c_ptr(Y)
 
-        out_err_ptr = ctypes.POINTER(ctypes.c_double)()
-        out_size = ctypes.c_int32()
+        # Prepare pointers for Train Error results
+        out_train_err_ptr = ctypes.POINTER(ctypes.c_double)()
+        out_train_size = ctypes.c_int32()
+
+        # Prepare pointers for Test Error results
+        out_test_err_ptr = ctypes.POINTER(ctypes.c_double)()
+        out_test_size = ctypes.c_int32()
 
         lib.train_mlp(
             self.model_ptr,
             X_ptr, X.shape[0], X.shape[1],
             Y_ptr, Y.shape[0], Y.shape[1],
-            ctypes.byref(out_err_ptr),
-            ctypes.byref(out_size),
+            
+            # Pass references for Train outputs
+            ctypes.byref(out_train_err_ptr),
+            ctypes.byref(out_train_size),
+            
+            # Pass references for Test outputs
+            ctypes.byref(out_test_err_ptr),
+            ctypes.byref(out_test_size),
+            
             num_iter,
             lr,
+            train_proportion,
             error_list_size
         )
 
-        err = np.ctypeslib.as_array(out_err_ptr, shape=(out_size.value,))
-        err_copy = np.copy(err)
-        lib.free_buffer(out_err_ptr)
-        return err_copy
+        # 1. Process Train Errors
+        train_err = np.ctypeslib.as_array(out_train_err_ptr, shape=(out_train_size.value,))
+        train_err_copy = np.copy(train_err)
+        lib.free_buffer(out_train_err_ptr)
+
+        # 2. Process Test Errors
+        test_err = np.ctypeslib.as_array(out_test_err_ptr, shape=(out_test_size.value,))
+        test_err_copy = np.copy(test_err)
+        lib.free_buffer(out_test_err_ptr)
+
+        return train_err_copy, test_err_copy
 
     def release(self):
         lib.release_mlp(self.model_ptr)

@@ -7,6 +7,11 @@
 
 #include <Eigen/Dense>
 
+struct TrainingResults {
+    Eigen::VectorXd train_errors;
+    Eigen::VectorXd test_errors;
+};
+
 class MLP {
     Eigen::VectorXi NPL; // Neuron per layer
     int L; // last layer index
@@ -32,10 +37,15 @@ public:
         return &deltas;
     }
 
+    void save(const std::string &filepath) const;
+    void load(const std::string &filepath);
+
     [[nodiscard]] Eigen::VectorXd predict(const Eigen::VectorXd& X_input);
     [[nodiscard]] Eigen::MatrixXd predict(const Eigen::MatrixXd& X_input);
 
-    [[nodiscard]] Eigen::VectorXd train(const Eigen::MatrixXd& X_input, const Eigen::MatrixXd& Y, int num_iter, double learning_rate, int error_list_size);
+    [[nodiscard]] TrainingResults train(const Eigen::MatrixXd& X_input, const Eigen::MatrixXd& Y,
+                                    int num_iter, double learning_rate,
+                                    double train_proportion, int error_list_size);
 };
 
 

@@ -186,25 +186,40 @@ extern "C" {
         MLP* model,
         const double* X_data, const int32_t X_rows, const int32_t X_cols,
         const double* Y_data, const int32_t Y_rows, const int32_t Y_cols,
-        double** out_error_data,  // pointer to error buffer (output)
-        int32_t* out_size,        // size of the error array (output)
+        // Train Error Outputs
+        double** out_train_error,
+        int32_t* out_train_size,
+        // Test Error Outputs (NEW)
+        double** out_test_error,
+        int32_t* out_test_size,
+        // Params
         const int32_t num_iter = 1000,
         const float learning_rate = 0.01f,
-        const int32_t error_list_size = 1000)
+        const double train_proportion = 0.8,
+        const int32_t error_list_size = 1000) // Default to 80% train
     {
-        // Map input buffers to Eigen matrices (no copies)
         const MapMatrixXdRowMajor X(X_data, X_rows, X_cols);
         const MapMatrixXdRowMajor Y(Y_data, Y_rows, Y_cols);
 
-        // Train the model and get the error vector
-        Eigen::VectorXd error = model->train(Eigen::MatrixXd(X), Eigen::MatrixXd(Y), num_iter, learning_rate, error_list_size);
+        // Call the updated method
+        TrainingResults results = model->train(
+            Eigen::MatrixXd(X),
+            Eigen::MatrixXd(Y),
+            num_iter,
+            learning_rate,
+            train_proportion,
+            error_list_size
+        );
 
-        // Allocate output buffer
-        *out_size = static_cast<int32_t>(error.size());
-        *out_error_data = static_cast<double*>(std::malloc(error.size() * sizeof(double)));
+        // --- Handle Train Error Memory ---
+        *out_train_size = static_cast<int32_t>(results.train_errors.size());
+        *out_train_error = static_cast<double*>(std::malloc(results.train_errors.size() * sizeof(double)));
+        std::memcpy(*out_train_error, results.train_errors.data(), results.train_errors.size() * sizeof(double));
 
-        // Copy error data into the allocated buffer
-        std::memcpy(*out_error_data, error.data(), error.size() * sizeof(double));
+        // --- Handle Test Error Memory ---
+        *out_test_size = static_cast<int32_t>(results.test_errors.size());
+        *out_test_error = static_cast<double*>(std::malloc(results.test_errors.size() * sizeof(double)));
+        std::memcpy(*out_test_error, results.test_errors.data(), results.test_errors.size() * sizeof(double));
     }
 
     DLLEXPORT void release_mlp(const MLP *model) {
