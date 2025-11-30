@@ -6,6 +6,8 @@
 #define ML_LIB_MLP_H
 
 #include <Eigen/Dense>
+#include <fstream>
+#include <string>
 
 struct TrainingResults {
     Eigen::VectorXd train_errors;

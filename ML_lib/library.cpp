@@ -225,4 +225,30 @@ extern "C" {
     DLLEXPORT void release_mlp(const MLP *model) {
         delete model;
     }
+
+    DLLEXPORT void save_mlp_model(MLP* model, const char* filepath) {
+        if (model != nullptr) {
+            model->save(std::string(filepath));
+        }
+    }
+
+    // This function creates a NEW MLP pointer from a file
+    DLLEXPORT MLP* load_mlp_model(const char* filepath) {
+        // We create a dummy MLP first.
+        // The load function will overwrite NPL and resize everything.
+        // We pass minimal valid NPL {1, 1} just to satisfy the constructor.
+        Eigen::VectorXi dummy_npl(2);
+        dummy_npl << 1, 1;
+
+        MLP* model = new MLP(dummy_npl, true);
+
+        try {
+            model->load(std::string(filepath));
+        } catch (...) {
+            delete model;
+            return nullptr; // Return null if file not found/corrupted
+        }
+
+        return model;
+    }
 }

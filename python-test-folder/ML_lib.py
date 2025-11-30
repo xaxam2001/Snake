@@ -138,6 +138,12 @@ lib.train_mlp.restype = None
 lib.release_mlp.argtypes = [ctypes.c_void_p]
 lib.release_mlp.restype = None
 
+lib.save_mlp_model.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+lib.save_mlp_model.restype = None
+
+lib.load_mlp_model.argtypes = [ctypes.c_char_p]
+lib.load_mlp_model.restype = ctypes.c_void_p # Returns pointer to new MLP
+
 def _to_c_ptr(arr: np.ndarray):
     arr = np.ascontiguousarray(arr, dtype=np.float64)
     return arr.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
@@ -278,9 +284,19 @@ class LinearRegressor:
 
 
 class MLP:
-    def __init__(self, layers: list[int], is_classification: bool = True):
-        arr = (ctypes.c_int32 * len(layers))(*layers)
-        self.model_ptr = lib.create_mlp(arr, len(layers), is_classification)
+    def __init__(self, layers: list[int] = None, is_classification: bool = True, _existing_ptr=None):
+        """
+        Modified constructor to handle loading from pointer OR creating new.
+        """
+        if _existing_ptr:
+            # Wrap an existing C++ pointer (used by load)
+            self.model_ptr = _existing_ptr
+        else:
+            # Create a new C++ model
+            if layers is None:
+                raise ValueError("Layers must be defined if not loading from pointer")
+            arr = (ctypes.c_int32 * len(layers))(*layers)
+            self.model_ptr = lib.create_mlp(arr, len(layers), is_classification)
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         x = np.asarray(x, dtype=np.float64)
@@ -352,6 +368,23 @@ class MLP:
 
     def release(self):
         lib.release_mlp(self.model_ptr)
+
+    def save(self, filepath: str):
+        # Python strings need encoding to C-strings (bytes)
+        b_path = filepath.encode('utf-8')
+        lib.save_mlp_model(self.model_ptr, b_path)
+
+    @staticmethod
+    def load(filepath: str):
+        b_path = filepath.encode('utf-8')
+        ptr = lib.load_mlp_model(b_path)
+        
+        if not ptr:
+            raise IOError(f"Could not load model from {filepath}")
+            
+        # Return a new MLP instance wrapping this pointer
+        # We pass None for layers/classification because the C++ load overwrote them anyway
+        return MLP(layers=[], is_classification=True, _existing_ptr=ptr)
 
     def __del__(self):
         if hasattr(self, "model_ptr") and self.model_ptr:
