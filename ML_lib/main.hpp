@@ -20,8 +20,8 @@ int main() {
     std::cout << "Labels Y:\n" << Y << std::endl;
 
     // ===== MLP model tests ======
-    Eigen::VectorXi NPL(3);
-    NPL << 2, 2, 2;
+    Eigen::VectorXi NPL(4);
+    NPL << 2, 3, 4, 2;
     MLP mlp(NPL, true);
 
     for (int l = 0; l < NPL.size(); ++l) {
@@ -30,10 +30,27 @@ int main() {
         std::cout << "deltas: " << (*mlp.get_deltas())[l] << std::endl;
     }
 
-    Eigen::RowVectorXd error_list = mlp.train(X.transpose(), Y.transpose(), 1000, 0.1, 10);
+    TrainingResults error_lists = mlp.train(X.transpose(), Y.transpose(), 1000, 0.1, 1.0, 10);
 
-    std::cout << "error list: " << error_list << std::endl;
+    std::cout << "train error list: " << error_lists.train_errors << std::endl;
+    std::cout << "test error list: " << error_lists.test_errors << std::endl;
 
+    for (int i = 0; i < X.rows(); i++) {
+        Eigen::VectorXd x_sample = X.row(i); // take the i-th training sample
+        Eigen::VectorXd y_pred = mlp.predict(x_sample);
+        std::cout << "Input: " << x_sample << std::endl
+                  << "Prediction: " << y_pred << std::endl;
+    }
+
+    mlp.save("test.bin");
+    Eigen::VectorXi dummy_npl(2);
+    dummy_npl << 1, 1;
+
+    MLP* loaded_model = new MLP(dummy_npl, true);
+
+    loaded_model->load("test.bin");
+
+    std::cout << "loaded MLP output" << std::endl;
     for (int i = 0; i < X.rows(); i++) {
         Eigen::VectorXd x_sample = X.row(i); // take the i-th training sample
         Eigen::VectorXd y_pred = mlp.predict(x_sample);

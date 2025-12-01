@@ -9,6 +9,9 @@ using Godot;
 public partial class GameManager : Node
 {
 	[Export] public Snake.Difficulty Difficulty; // used to set the difficulty of the game
+
+	[Export] public bool EnableAI = false;
+	[Export] public AIPlayerManager AIManager;
 	
 	private bool[] _action; // _actions represent the user's action
 	private bool[] _lastAction;
@@ -35,6 +38,12 @@ public partial class GameManager : Node
 		_timer = new Timer();
 		AddChild(_timer);
 		_timer.Timeout += OnTimeOut;
+		
+		if (EnableAI && AIManager == null)
+		{
+			GD.Print("AIManager is not set, AI will not be enabled");
+			EnableAI = false;
+		}
 	}
 
 	/// <summary>
@@ -71,6 +80,8 @@ public partial class GameManager : Node
 
 	public override void _Process(double delta)
 	{
+		if (EnableAI) return;
+		
 		base._Process(delta);
 
 		// Get the user's action from the Godot input system
@@ -130,6 +141,8 @@ public partial class GameManager : Node
 
 		// emit the signal to update the game
 		EmitSignal(SignalName.GameUpdated, data);
+
+		if (EnableAI) _action = AIManager.GetNextAction(_gameState);
 	}
 	
 	// Signals

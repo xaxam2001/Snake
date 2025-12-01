@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=4 uid="uid://cuhg20xdbonnx"]
+[gd_scene load_steps=11 format=4 uid="uid://cuhg20xdbonnx"]
 
 [ext_resource type="FontFile" uid="uid://16ykjeqppu84" path="res://assets/font/PixelOperator8.ttf" id="1_iywne"]
 [ext_resource type="Script" uid="uid://dsl4uwl8blv2e" path="res://scripts/GameManager.cs" id="1_uwrxv"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://b0dw3j2h6d0r8" path="res://scripts/ScoreLabel.cs" id="5_p57ef"]
 [ext_resource type="Script" uid="uid://dvwsv3j00nu1y" path="res://scripts/GameOverMenu.cs" id="6_p57ef"]
 [ext_resource type="Script" uid="uid://dodttphwm2pjf" path="res://scripts/MainMenu.cs" id="7_u5sy4"]
+[ext_resource type="Script" uid="uid://clnonx36lwkbx" path="res://scripts/AIPlayerManager.cs" id="9_0tnpc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p57ef"]
 bg_color = Color(0.2444494, 0.24792117, 0.26197112, 1)
@@ -50,9 +51,11 @@ _snakeHeadTileLeft = Vector2i(2, 0)
 _snakeBodyTile = Vector2i(5, 0)
 _foodTile = Vector2i(6, 1)
 
-[node name="GameManager" type="Node" parent="."]
+[node name="GameManager" type="Node" parent="." node_paths=PackedStringArray("AIManager")]
 unique_name_in_owner = true
 script = ExtResource("1_uwrxv")
+EnableAI = true
+AIManager = NodePath("../AIPlayerManager")
 
 [node name="GameOverMenu" type="Node2D" parent="."]
 unique_name_in_owner = true
@@ -167,3 +170,7 @@ theme_override_fonts/font = ExtResource("1_iywne")
 theme_override_font_sizes/font_size = 31
 theme_override_styles/normal = SubResource("StyleBoxFlat_p57ef")
 text = "Hard"
+
+[node name="AIPlayerManager" type="Node" parent="."]
+script = ExtResource("9_0tnpc")
+modelPath = "../Models/7302X_520+256+128+64+32+4_10kiter_0.01lr_0.9train.bin"

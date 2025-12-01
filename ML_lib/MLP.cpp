@@ -205,7 +205,7 @@ TrainingResults MLP::train(const Eigen::MatrixXd &X_input, const Eigen::MatrixXd
 }
 
 void MLP::save(const std::string &filepath) const {
-    std::ofstream out(filepath, std::ios::binary);
+    std::ofstream out(filepath, std::ios::binary | std::ios::trunc); // Add trunc to force overwrite
     if (!out.is_open()) {
         throw std::runtime_error("Cannot open file for writing: " + filepath);
     }
@@ -214,14 +214,13 @@ void MLP::save(const std::string &filepath) const {
 
     int layers_count = NPL.size();
     out.write(reinterpret_cast<const char*>(&layers_count), sizeof(int));
-
-    // Eigen vectors are contiguous in memory, so we can write the block directly
     out.write(reinterpret_cast<const char*>(NPL.data()), NPL.size() * sizeof(int));
 
-    for (const auto &w : weights) {
-        // Eigen matrices are column-major by default.
-        // We write the raw data block.
-        // w.size() returns rows*cols
+    // Consistent loop: l=1 to L
+    for (int l = 1; l <= L; l++) {
+        const auto &w = weights[l];
+        // Always write, even if empty (though it shouldn't be)
+        // This keeps the file stream in sync with the load loop.
         out.write(reinterpret_cast<const char*>(w.data()), w.size() * sizeof(double));
     }
 
@@ -234,16 +233,17 @@ void MLP::load(const std::string &filepath) {
         throw std::runtime_error("Cannot open file for reading: " + filepath);
     }
 
+    // 1. Read Header
     in.read(reinterpret_cast<char*>(&isClassification), sizeof(bool));
 
     int layers_count = 0;
     in.read(reinterpret_cast<char*>(&layers_count), sizeof(int));
 
-    // Read NPL data
+    // 2. Resize NPL
     this->NPL.resize(layers_count);
     in.read(reinterpret_cast<char*>(this->NPL.data()), layers_count * sizeof(int));
 
-    // (logic similar to constructor)
+    // 3. Re-initialize Structures
     this->L = layers_count - 1;
     this->weights.clear();
     this->weights.resize(L + 1);
@@ -252,23 +252,26 @@ void MLP::load(const std::string &filepath) {
     this->deltas.clear();
     this->deltas.resize(L + 1);
 
-    // Resize matrices based on the loaded NPL
+    // 4. Resize and Read Matrices
     for (int l = 0; l <= L; l++) {
-        // Layer l has NPL(l) neurons, plus 1 for bias if l < L
-        int neuron_count = NPL(l) + (l < L ? 1 : 0);
+        // --- Init X and Deltas ---
+        // FIX: Match Constructor logic. Always size NPL(l) + 1 for bias.
+        int neuron_count = NPL(l) + 1;
+
         this->X[l] = Eigen::VectorXd::Zero(neuron_count);
-        if (l < L) this->X[l](neuron_count - 1) = 1.0; // Bias
+        this->X[l](0) = 1.0; // FIX: Bias is at index 0, not at the end.
 
-        // Init Deltas
-        this->deltas[l] = Eigen::VectorXd::Zero(NPL(l));
+        this->deltas[l] = Eigen::VectorXd::Zero(neuron_count);
 
-        // Init Weights (only exists for l=1 to L)
+        // --- Init Weights (ONLY if l > 0) ---
         if (l > 0) {
-            int rows = NPL(l);
-            int cols = NPL(l - 1) + 1; // +1 for bias from previous layer
+            // FIX: Correct dimensions matching the constructor
+            int rows = NPL(l - 1) + 1; // Previous Layer + Bias
+            int cols = NPL(l) + 1;     // Current Layer + Bias
+
             this->weights[l] = Eigen::MatrixXd::Zero(rows, cols);
 
-            // This relies on Eigen's storage layout being consistent (default is ColMajor)
+            // Read the data
             in.read(reinterpret_cast<char*>(this->weights[l].data()), rows * cols * sizeof(double));
         }
     }
