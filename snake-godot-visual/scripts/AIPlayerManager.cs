@@ -61,12 +61,12 @@ public partial class AIPlayerManager : Node
         GD.Print($"0: {outputProbs[0]} 1: {outputProbs[1]} 2: {outputProbs[2]} 3: {outputProbs[3]}");
         
         // Find ArgMax (Index of the highest value)
-        int maxIndex = 0;
-        double maxValue = outputProbs[0];
+        int maxIndex = -1;
+        double maxValue = 0.5;
 
-        for (int i = 1; i < outputProbs.Length; i++)
+        for (int i = 0; i < outputProbs.Length; i++)
         {
-            if (outputProbs[i] > maxValue)
+            if (outputProbs[i] > maxValue && outputProbs[i] > 0.6)
             {
                 maxValue = outputProbs[i];
                 maxIndex = i;

@@ -173,4 +173,4 @@ text = "Hard"
 
 [node name="AIPlayerManager" type="Node" parent="."]
 script = ExtResource("9_0tnpc")
-modelPath = "../Models/7302X_520+256+128+64+32+4_10kiter_0.01lr_0.9train.bin"
+modelPath = "..\\Models\\7302X_[520, 256, 128, 64, 32, 4]_100000iter_0.001lr_0.9train.bin"
