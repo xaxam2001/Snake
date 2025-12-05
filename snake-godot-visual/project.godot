@@ -17,7 +17,8 @@ config/icon="res://assets/sprites/icon.svg"
 
 [display]
 
-window/size/viewport_height=1152
+window/size/viewport_width=864
+window/size/viewport_height=864
 
 [dotnet]
 

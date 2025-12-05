@@ -16,30 +16,30 @@ bg_color = Color(0.2444494, 0.24792117, 0.26197112, 1)
 [node name="Game" type="Node2D"]
 
 [node name="ScoreLabel" type="Label" parent="."]
-offset_left = 72.0
-offset_top = 72.0
-offset_right = 392.0
-offset_bottom = 247.0
+offset_left = 61.0
+offset_top = 62.0
+offset_right = 250.0
+offset_bottom = 162.0
 theme_override_fonts/font = ExtResource("1_iywne")
-theme_override_font_sizes/font_size = 128
+theme_override_font_sizes/font_size = 72
 text = "100"
 vertical_alignment = 1
 script = ExtResource("5_p57ef")
 
 [node name="DifficultyLabel" type="Label" parent="."]
-offset_left = 724.0
-offset_top = 1014.0
-offset_right = 1072.0
-offset_bottom = 1097.0
+offset_left = 561.0
+offset_top = 758.0
+offset_right = 802.0
+offset_bottom = 813.0
 theme_override_fonts/font = ExtResource("1_iywne")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 24
 text = "Normal mode"
 horizontal_alignment = 2
 vertical_alignment = 1
 script = ExtResource("3_gee14")
 
 [node name="GameRenderer" type="TileMapLayer" parent="."]
-scale = Vector2(8, 8)
+scale = Vector2(6, 6)
 tile_map_data = PackedByteArray("AAAAAAAAAAAMAAAAAAABAAAAAAAHAAIAAAACAAAAAAAHAAIAAAADAAAAAAAHAAIAAAAEAAAAAAAHAAIAAAAFAAAAAAAHAAIAAAAGAAAAAAAHAAIAAAAHAAAAAAAHAAIAAAAIAAAAAAAHAAIAAAAJAAAAAAAHAAIAAAAKAAAAAAAHAAIAAAALAAAAAAAHAAIAAAAAAAEAAAAIAAIAAAAAAAIAAAAIAAIAAAAAAAMAAAAIAAIAAAAAAAQAAAAIAAIAAAARAAEAAAAJAAIAAAARAAIAAAAJAAIAAAARAAMAAAAJAAIAAAARAAQAAAAJAAIAAAARAAUAAAAJAAIAAAARAAYAAAAJAAIAAAARAAcAAAAJAAIAAAARAAgAAAAJAAIAAAARAAkAAAAJAAIAAAARAAoAAAAJAAIAAAARAAsAAAAJAAIAAAARAAwAAAAJAAIAAAARAA0AAAAJAAIAAAARAA4AAAAJAAIAAAARAA8AAAAJAAIAAAARABAAAAAJAAIAAAAQABEAAAAKAAIAAAAPABEAAAAKAAIAAAAOABEAAAAKAAIAAAANABEAAAAKAAIAAAAMABEAAAAKAAIAAAALABEAAAAKAAIAAAAKABEAAAAKAAIAAAAJABEAAAAKAAIAAAAIABEAAAAKAAIAAAAHABEAAAAKAAIAAAAGABEAAAAKAAIAAAAFABEAAAAKAAIAAAAEABEAAAAKAAIAAAADABEAAAAKAAIAAAACABEAAAAKAAIAAAABABEAAAAKAAIAAAAMAAAAAAAHAAIAAAANAAAAAAAHAAIAAAAOAAAAAAAHAAIAAAAPAAAAAAAHAAIAAAAQAAAAAAAHAAIAAAAAAAUAAAAIAAIAAAAAAAYAAAAIAAIAAAAAAAcAAAAIAAIAAAAAAAgAAAAIAAIAAAAAAAkAAAAIAAIAAAAAAAoAAAAIAAIAAAAAAAsAAAAIAAIAAAAAAAwAAAAIAAIAAAAAAA0AAAAIAAIAAAAAAA4AAAAIAAIAAAAAAA8AAAAIAAIAAAAAABAAAAAIAAIAAAARABEAAAAMAAAAAAAAABEAAAAMAAAAAAARAAAAAAAMAAAAAAA=")
 tile_set = ExtResource("2_lnu2h")
 script = ExtResource("3_lnu2h")
@@ -54,12 +54,12 @@ _foodTile = Vector2i(6, 1)
 [node name="GameManager" type="Node" parent="." node_paths=PackedStringArray("AIManager")]
 unique_name_in_owner = true
 script = ExtResource("1_uwrxv")
-EnableAI = true
 AIManager = NodePath("../AIPlayerManager")
 
 [node name="GameOverMenu" type="Node2D" parent="."]
 unique_name_in_owner = true
 visible = false
+scale = Vector2(0.75, 0.75)
 script = ExtResource("6_p57ef")
 
 [node name="GameOverLabel" type="Label" parent="GameOverMenu"]
@@ -110,6 +110,7 @@ text = "MENU"
 
 [node name="MainMenu" type="Node2D" parent="."]
 unique_name_in_owner = true
+scale = Vector2(0.75, 0.75)
 script = ExtResource("7_u5sy4")
 
 [node name="SelectDiffLabel" type="Label" parent="MainMenu"]
