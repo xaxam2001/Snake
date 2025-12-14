@@ -23,6 +23,9 @@ lib.get_weights_flat.restype = None
 lib.free_buffer.argtypes = [ctypes.POINTER(ctypes.c_double)]
 lib.free_buffer.restype = None
 
+lib.save_linear_model.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+lib.save_linear_model.restype = None
+
 # ===== Perceptron bindings =====
 
 lib.create_perceptron_model.argtypes = [ctypes.c_int32] 
@@ -62,6 +65,9 @@ lib.train_perceptron_model.restype = None
 lib.release_perceptron_model.argtypes = [ctypes.c_void_p]
 lib.release_perceptron_model.restype = None
 
+lib.load_perceptron_model.argtypes = [ctypes.c_char_p]
+lib.load_perceptron_model.restype = ctypes.c_void_p # Returns pointer to new PerceptronModel
+
 # ===== Linear Regressor bindings =====
 
 lib.create_linear_regressor.argtypes = [ctypes.c_int32] 
@@ -96,6 +102,9 @@ lib.train_linear_regressor.restype = None
 
 lib.release_linear_regressor.argtypes = [ctypes.c_void_p]
 lib.release_linear_regressor.restype = None
+
+lib.load_linear_regressor_model.argtypes = [ctypes.c_char_p]
+lib.load_linear_regressor_model.restype = ctypes.c_void_p # Returns pointer to new LinearRegressor
 
 # ===== MLP bindings =====
 
@@ -150,9 +159,14 @@ def _to_c_ptr(arr: np.ndarray):
 
 class PerceptronModel:
 
-    def __init__(self, input_size: int):
-        self.model_ptr = lib.create_perceptron_model(input_size)
-
+    def __init__(self, input_size: int = 0, _existing_ptr=None):
+        if _existing_ptr:
+            self.model_ptr = _existing_ptr
+        else:
+            if input_size <= 0:
+                raise ValueError("Input size must be > 0 when creating a new model")
+            self.model_ptr = lib.create_perceptron_model(input_size)
+            
     def predict_batch(self, X: np.ndarray) -> float:
         X_ptr = _to_c_ptr(X)
         out_data_ptr = ctypes.POINTER(ctypes.c_double)()
@@ -220,12 +234,33 @@ class PerceptronModel:
         error_copy = np.copy(error_array)
         lib.free_buffer(error_ptr)
         return error_copy
+    
+    def save(self, filepath: str):
+        b_path = filepath.encode('utf-8')
+        lib.save_linear_model(self.model_ptr, b_path)
+
+    @staticmethod
+    def load(filepath: str):
+        b_path = filepath.encode('utf-8')
+        ptr = lib.load_perceptron_model(b_path)
+        
+        if not ptr:
+            raise IOError(f"Could not load model from {filepath}")
+            
+        # Return a new instance wrapping this pointer
+        # input_size=0 is fine because the C++ load overwrites it anyway
+        return PerceptronModel(input_size=0, _existing_ptr=ptr)
 
 class LinearRegressor:
 
-    def __init__(self, input_size: int):
-        self.model_ptr = lib.create_linear_regressor(input_size)
-
+    def __init__(self, input_size: int = 0, _existing_ptr=None):
+        if _existing_ptr:
+            self.model_ptr = _existing_ptr
+        else:
+            if input_size <= 0:
+                raise ValueError("Input size must be > 0 when creating a new model")
+            self.model_ptr = lib.create_linear_regressor(input_size)
+        
     def predict_batch(self, X: np.ndarray) -> float:
         X_ptr = _to_c_ptr(X)
         out_data_ptr = ctypes.POINTER(ctypes.c_double)()
@@ -281,6 +316,20 @@ class LinearRegressor:
             X_ptr, X.shape[0], X.shape[1],
             Y_ptr, Y.shape[0], Y.shape[1],
         )
+
+    def save(self, filepath: str):
+        b_path = filepath.encode('utf-8')
+        lib.save_linear_model(self.model_ptr, b_path)
+
+    @staticmethod
+    def load(filepath: str):
+        b_path = filepath.encode('utf-8')
+        ptr = lib.load_linear_regressor_model(b_path)
+        
+        if not ptr:
+            raise IOError(f"Could not load model from {filepath}")
+            
+        return LinearRegressor(input_size=0, _existing_ptr=ptr)
 
 
 class MLP:
