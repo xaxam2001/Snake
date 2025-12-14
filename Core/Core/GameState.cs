@@ -70,26 +70,4 @@ public class GameState
     {
         return worldCoordinate - targetCoordinateCenter;
     }
-    
-    // /// <summary>
-    // /// Updates the game state with the current game over status, score, and grid elements.
-    // /// </summary>
-    // /// <param name="isGameOver">Indicates whether the game has ended. True if the game is over; otherwise, false.</param>
-    // /// <param name="score">The current score of the game.</param>
-    // /// <param name="gridElement">The 2D grid representing the game board with its elements.</param>
-    // public void UpdateGameState(bool isGameOver, int score, Game.Element[,] gridElement)
-    // {
-    //     State[0] = isGameOver ? 1 : 0;
-    //     State[1] = score;
-    //     
-    //     // unwrap the grid in the remaining part of the state vector
-    //     for (int i = 0; i < GridSize; i++)
-    //     {
-    //         for (int j = 0; j < GridSize; j++)
-    //         {
-    //             State[INFO_SIZE + i *GridSize + j] = (int)gridElement[i, j];
-    //         }
-    //     }
-    // }
-    
 }
