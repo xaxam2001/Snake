@@ -22,15 +22,48 @@ public partial class AIPlayerManager : Node
     
     public override void _Ready()
     {
-        // load the dll
+        string dllPath;
+        string absoluteModelPath = "";
+
+        // 1. Determine Paths based on where we are running
+        if (OS.HasFeature("editor"))
+        {
+            // EDITOR MODE: Files are in the project folder (res://)
+            dllPath = ProjectSettings.GlobalizePath("res://ML_lib.dll");
+            
+            if (!string.IsNullOrEmpty(modelPath))
+            {
+                absoluteModelPath = ProjectSettings.GlobalizePath(modelPath);
+            }
+        }
+        else
+        {
+            // BUILD MODE: Files must be copied next to the .exe
+            string exeDir = OS.GetExecutablePath().GetBaseDir();
+            
+            // We assume ML_lib.dll is in the same folder as the game .exe
+            dllPath = System.IO.Path.Combine(exeDir, "ML_lib.dll");
+
+            if (!string.IsNullOrEmpty(modelPath))
+            {
+                // We assume the model file is also copied to the root of the exe folder
+                // We extract just the filename (e.g., "Snake_Polished.bin") from the path
+                string modelFileName = System.IO.Path.GetFileName(modelPath);
+                absoluteModelPath = System.IO.Path.Combine(exeDir, modelFileName);
+            }
+        }
+
+        // 2. Load the DLL
         if (_dllHandle == IntPtr.Zero)
         {
             try 
             {
-                // Convert "res://ML_lib.dll" to OS path
-                string dllPath = ProjectSettings.GlobalizePath("res://ML_lib.dll");
-                
-                // Load it into memory
+                if (!System.IO.File.Exists(dllPath))
+                {
+                    GD.PrintErr($"DLL not found at: {dllPath}");
+                    return;
+                }
+
                 _dllHandle = NativeLibrary.Load(dllPath);
                 GD.Print($"Successfully loaded DLL from: {dllPath}");
             }
@@ -41,14 +74,28 @@ public partial class AIPlayerManager : Node
             }
         }
 
-        //  Load the model
-        if (!string.IsNullOrEmpty(modelPath))
+        // 3. Load the Model
+        if (!string.IsNullOrEmpty(absoluteModelPath))
         {
-            string globalPath = ProjectSettings.GlobalizePath(modelPath);
-            _mlp = MLP.Load(globalPath); 
+            try 
+            {
+                if (!System.IO.File.Exists(absoluteModelPath))
+                {
+                    GD.PrintErr($"Model file not found at: {absoluteModelPath}");
+                }
+                else 
+                {
+                    _mlp = MLP.Load(absoluteModelPath); 
+                    GD.Print($"Successfully loaded Model from: {absoluteModelPath}");
+                }
+            }
+            catch (Exception e)
+            {
+                 GD.PrintErr($"Failed to load MLP: {e.Message}");
+            }
         }
     }
-
+    
     public bool[] GetNextAction(int[] gameState)
     {
         if (_mlp == null) 

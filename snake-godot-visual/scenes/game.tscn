@@ -192,5 +192,5 @@ placeholder_text = "Model path"
 [node name="AIPlayerManager" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("9_0tnpc")
-modelPath = "..\\Models\\26760X_[520, 128, 64, 4]_1400000iter_0.01+0.001lr_0.9train.bin"
+modelPath = "..\\Models\\46696X_[520, 128, 64, 4]_1400000iter_0.01+0.001lr_0.9train.bin"
 noiseScale = 0.1
