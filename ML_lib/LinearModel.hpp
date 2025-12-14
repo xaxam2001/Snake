@@ -20,9 +20,10 @@ public:
     [[nodiscard]] int get_input_size() const;
     [[nodiscard]] const Eigen::MatrixXd* get_weights() const;
 
+    void save(const std::string &filepath) const;
+    void load(const std::string &filepath);
 
     [[nodiscard]] virtual double predict(const Eigen::RowVectorXd& X) const = 0;
-
     [[nodiscard]] virtual Eigen::MatrixXd predict(const Eigen::MatrixXd& X) const = 0;
 };
 

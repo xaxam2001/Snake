@@ -42,6 +42,38 @@ extern "C" {
         std::free(ptr);
     }
 
+    DLLEXPORT void save_linear_model(LinearModel* model, const char* filepath) {
+        if (model != nullptr) {
+            model->save(std::string(filepath));
+        }
+    }
+
+    // /!\ loader need two separated method because they return two different object
+    // Loader for Perceptron
+    DLLEXPORT PerceptronClassifier* load_perceptron_model(const char* filepath) {
+        // Create dummy with 0 input size. Load() will overwrite input_size and resize weights.
+        auto* model = new PerceptronClassifier(0);
+        try {
+            model->load(std::string(filepath));
+        } catch (...) {
+            delete model;
+            return nullptr;
+        }
+        return model;
+    }
+
+    // Loader for Linear Regressor
+    DLLEXPORT LinearRegressor* load_linear_regressor_model(const char* filepath) {
+        auto* model = new LinearRegressor(0);
+        try {
+            model->load(std::string(filepath));
+        } catch (...) {
+            delete model;
+            return nullptr;
+        }
+        return model;
+    }
+
     // ============= PerceptronClassifier related method ================
 
     DLLEXPORT PerceptronClassifier *create_perceptron_model(const int32_t input_size) {

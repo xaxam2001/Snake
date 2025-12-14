@@ -5,6 +5,7 @@
 #include "LinearModel.hpp"
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
 
 LinearModel::LinearModel(const int input_size) {
     this->input_size = input_size ;
@@ -17,6 +18,42 @@ int LinearModel::get_input_size() const {
 
 const Eigen::MatrixXd* LinearModel::get_weights() const {
     return &weights;
+}
+
+void LinearModel::save(const std::string &filepath) const {
+    std::ofstream out(filepath, std::ios::binary | std::ios::trunc);
+    if (!out.is_open()) {
+        throw std::runtime_error("Cannot open file for writing: " + filepath);
+    }
+
+    // Save Input Size
+    out.write(reinterpret_cast<const char*>(&input_size), sizeof(int));
+
+    // Save Weights, Weights are always (input_size + 1) x 1
+    out.write(reinterpret_cast<const char*>(weights.data()), weights.size() * sizeof(double));
+
+    out.close();
+}
+
+void LinearModel::load(const std::string &filepath) {
+    std::ifstream in(filepath, std::ios::binary);
+    if (!in.is_open()) {
+        throw std::runtime_error("Cannot open file for reading: " + filepath);
+    }
+
+    // Read Input Size
+    in.read(reinterpret_cast<char*>(&input_size), sizeof(int));
+
+    // Resize Weights Matrix
+    // weights is (input_size + 1, 1)
+    int rows = input_size + 1;
+    int cols = 1;
+    this->weights = Eigen::MatrixXd::Zero(rows, cols);
+
+    // Read Weights Data
+    in.read(reinterpret_cast<char*>(this->weights.data()), rows * cols * sizeof(double));
+
+    in.close();
 }
 
 Eigen::MatrixXd PerceptronClassifier::predict(const Eigen::MatrixXd& X) const {
