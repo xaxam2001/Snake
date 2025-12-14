@@ -27,11 +27,12 @@ public class GameState
     // updated game state:
     // - game over +1
     // - score +1
-    // - coordinates of apple +2
     // - distance to top edge +1
     // - distance to right edge +1
     // - distance to bottom edge +1
     // - distance to left edge +1
+    // - coordinates of apple +2
+    // - snake size +1
     // - coordinates of snake body relative to snake head +2x16x16 (has to follow the order of the snake pieces
     // and, since the vector is of fixed size, we add coordinates of 0 for padding)
     public void UpdateGameState(bool isGameOver, int score, Vector2Int applePosition, Vector2Int snakeHeadPosition, Queue<Vector2Int> snakeBody)
