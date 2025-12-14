@@ -54,6 +54,7 @@ _foodTile = Vector2i(6, 1)
 [node name="GameManager" type="Node" parent="." node_paths=PackedStringArray("AIManager")]
 unique_name_in_owner = true
 script = ExtResource("1_uwrxv")
+EnableAI = true
 AIManager = NodePath("../AIPlayerManager")
 
 [node name="GameOverMenu" type="Node2D" parent="."]
@@ -172,6 +173,24 @@ theme_override_font_sizes/font_size = 31
 theme_override_styles/normal = SubResource("StyleBoxFlat_p57ef")
 text = "Hard"
 
+[node name="MLCheckBox" type="CheckBox" parent="MainMenu"]
+offset_left = 456.0
+offset_top = 850.6667
+offset_right = 480.0
+offset_bottom = 874.6667
+theme_override_font_sizes/font_size = 24
+text = "Enable ML player"
+
+[node name="ModelPath" type="LineEdit" parent="MainMenu"]
+offset_left = 256.0
+offset_top = 901.3334
+offset_right = 904.0
+offset_bottom = 969.3334
+theme_override_font_sizes/font_size = 32
+placeholder_text = "Model path"
+
 [node name="AIPlayerManager" type="Node" parent="."]
+unique_name_in_owner = true
 script = ExtResource("9_0tnpc")
-modelPath = "..\\Models\\7302X_[520, 256, 128, 64, 32, 4]_100000iter_0.001lr_0.9train.bin"
+modelPath = "..\\Models\\26760X_[520, 128, 64, 4]_1400000iter_0.01+0.001lr_0.9train.bin"
+noiseScale = 0.1

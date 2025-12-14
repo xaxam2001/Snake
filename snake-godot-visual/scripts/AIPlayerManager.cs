@@ -5,20 +5,29 @@ using System.Runtime.InteropServices;
 
 public partial class AIPlayerManager : Node
 {
-    [Export] private string modelPath;
+    [Export] public string modelPath;
+    
+    [Export] private bool useNoise = true;
+    [Export] private float noiseScale = 0.05f;
+    
+    [Export] private int stuckThreshold = 100;
     
     private MLP _mlp;
     private static IntPtr _dllHandle = IntPtr.Zero;
     
+    private Random _rng = new Random();
+    
+    private int _lastScore = 0;
+    private int _stepsSinceScore = 0;
+    
     public override void _Ready()
     {
-        // 1. MANUALLY LOAD THE DLL
-        // We only need to do this once per game session
+        // load the dll
         if (_dllHandle == IntPtr.Zero)
         {
             try 
             {
-                // Convert "res://ML_lib.dll" to a real OS path (e.g., C:\Users\...\ML_lib.dll)
+                // Convert "res://ML_lib.dll" to OS path
                 string dllPath = ProjectSettings.GlobalizePath("res://ML_lib.dll");
                 
                 // Load it into memory
@@ -32,11 +41,10 @@ public partial class AIPlayerManager : Node
             }
         }
 
-        // 2. Load the Model (Standard logic)
+        //  Load the model
         if (!string.IsNullOrEmpty(modelPath))
         {
             string globalPath = ProjectSettings.GlobalizePath(modelPath);
-            // Now this call to Core will work because the DLL is already loaded!
             _mlp = MLP.Load(globalPath); 
         }
     }
@@ -48,39 +56,66 @@ public partial class AIPlayerManager : Node
             GD.PrintErr("MLP model is not loaded.");
             return new bool[4]; // Return empty/default move
         }
+        
+        int currentScore = gameState[1];
+
+        if (currentScore != _lastScore)
+        {
+            // Score changed, the snake is not stuck
+            _lastScore = currentScore;
+            _stepsSinceScore = 0;
+        }
+        else
+        {
+            // Score didn't change we count the step
+            _stepsSinceScore++;
+        }
+        GD.Print($"Steps since score change: {_stepsSinceScore}:");
+        
+        // if the score didn't change for more than the threshold, we consider it stuck
+        bool isStuck = _stepsSinceScore > stuckThreshold;
 
         double[] inputs = gameState
             .Skip(1)                  // Skip the first element (GameOver flag)
-            .Select(x => (double)x)   // Convert int to double
+            .Select(x => (double)x)  
             .ToArray();
 
         // Predict
         double[] outputProbs = _mlp.Predict(inputs);
         
-        GD.Print($"Model Output Size: {outputProbs.Length}");
+        // if the snake is considered stuck, we add some noise to try to break the loop
+        if (useNoise && isStuck)
+        {
+            GD.Print($"Before noise: \n0: {outputProbs[0]} 1: {outputProbs[1]} 2: {outputProbs[2]} 3: {outputProbs[3]}");
+            for (int i = 0; i < outputProbs.Length; i++)
+            {
+                // Generates random value between [-noiseScale, +noiseScale]
+                double noise = (_rng.NextDouble() * 2.0 - 1.0) * noiseScale;
+                outputProbs[i] += noise;
+            }
+            
+            GD.Print("After noise:");
+        }
+        
         GD.Print($"0: {outputProbs[0]} 1: {outputProbs[1]} 2: {outputProbs[2]} 3: {outputProbs[3]}");
         
         // Find ArgMax (Index of the highest value)
         int maxIndex = -1;
-        double maxValue = 0.5;
+        double maxValue = 0;
 
         for (int i = 0; i < outputProbs.Length; i++)
         {
-            if (outputProbs[i] > maxValue && outputProbs[i] > 0.6)
+            if (outputProbs[i] > maxValue)
             {
                 maxValue = outputProbs[i];
                 maxIndex = i;
             }
         }
-        
-        GD.Print($"Max: {maxIndex}");
-        GD.Print($"Max Value: {maxValue}");
-        
-        
+
         // Create bool[4] (One-Hot Encoding)
         bool[] actions = new bool[4];
         
-        // Ensure the index is within bounds (safety check)
+        // Ensure the index is good
         if (maxIndex >= 0 && maxIndex < actions.Length)
         {
             actions[maxIndex] = true;
